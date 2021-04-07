@@ -1,0 +1,1 @@
+recursive-include leaflet_admin_list *.py *.html *.js *.css

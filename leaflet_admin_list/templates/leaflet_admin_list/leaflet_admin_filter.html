@@ -1,0 +1,8 @@
+{% load i18n %}
+<h3>{% blocktrans with filter_title=title %} By {{ filter_title }} {% endblocktrans %}</h3>
+<ul class="bounding_box_filter" parameter_name="{{ spec.parameter_name }}" bbox_selected="{{ spec.bbox_selected }}" title_text="{{ spec.title }}">
+{% for choice in choices %}
+    <li{% if choice.selected %} class="selected"{% endif %}>
+    <a href="{{ choice.query_string|iriencode }}" title="{{ choice.display }}">{{ choice.display }}</a></li>
+{% endfor %}
+</ul>

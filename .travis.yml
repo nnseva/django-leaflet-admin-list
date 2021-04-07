@@ -1,0 +1,29 @@
+language: python
+matrix:
+    include:
+        - python: 3.6
+          env: TOXENV="py36--django{2.0,2.1,2.2,3.0},syntax"
+        - python: 3.7
+          env: TOXENV="py37--django{2.0,2.1,2.2,3.0},coverage"
+services:
+  - postgresql
+before_install:
+  - sudo add-apt-repository --yes ppa:ubuntugis/ppa
+  - sudo apt-get --quiet update
+  - sudo apt-get install --yes libgdal-dev gdal-bin
+  - sudo apt-get install --yes postgresql-9.6-postgis-2.5 postgis
+install:
+  - pip install tox
+before_script:
+  - psql -U postgres -c "create extension postgis"
+script:
+  - tox
+env:
+  global:
+  - DATABASE_USER=postgres
+  - DATABASE_PASSWORD=
+  - DATABASE_NAME=test
+  - DATABASE_HOST=
+sudo: false
+notifications:
+    email: false

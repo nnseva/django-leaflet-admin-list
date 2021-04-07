@@ -1,0 +1,164 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list leaflet_tags l10n static %}
+{% block result_list %}
+    {% block map %}
+<div id="leaflet_admin_list_map" class="results" style="height: calc(100vh - 240px); overflow-x: hidden;"></div>
+<script>
+django.jQuery(
+function () {
+    function loadmap() {
+        map = L.map('leaflet_admin_list_map', {
+            maxZoom: 19,
+            zoomControl: false,
+            attributionControl: false,
+        }).setView([0, 0], 1);
+
+        var colors = [
+            '#ff0000', '#800000', '#191970', '#ffa500', '#0000cd', '#7cfc00', '#00fa9a', '#00ffff', '#ff00ff', '#1e90ff', '#ffff54', '#dda0dd', '#ff1493', '#ffdab9', '#2f4f4f', '#6b8e23',
+        ]
+
+        var osm = L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '<a title="{% trans 'Open Street Map Tiles' %}" href="https://www.openstreetmap.org/">OSM</a>',
+            id: 'osm',
+        }).addTo(map);
+
+        js = {{ geojson|safe }};
+
+        geojson = L.geoJSON(js, {
+            pointToLayer: function(point, latlng) {
+                var point_style = point.properties.point_style || {};
+                var icon_style = point_style.icon;
+                point_style.icon = icon_style ? L.icon(icon_style) : L.Marker.prototype.options.icon;
+                return L.marker(latlng, point_style);
+            },
+            style: function(feature) {
+                return feature.properties.line_style;
+            },
+            onEachFeature: function(feature, layer) {
+                if( typeof(feature.properties.popup) != "undefined" ) {
+                    var popup = feature.properties.popup;
+                    if( popup[0] == '<' ) // >
+                        popup = django.jQuery(feature.properties.popup)[0];
+                    layer.bindPopup(popup);
+                }
+                if( typeof(feature.properties.tooltip) != "undefined" ) {
+                    var tooltip = feature.properties.tooltip;
+                    if( tooltip[0] == '<' ) // >
+                        tooltip = django.jQuery(feature.properties.tooltip)[0];
+                    layer.bindTooltip(tooltip);
+                }
+            }
+        }).addTo(map);
+
+        L.control.attribution({
+            prefix:
+                '<a title="A JS Library for interactive maps" href="https://leafletjs.com/" target="_blank">Leaflet v.'+L.version+'</a>' + ' | ' +
+                '<a title="{% blocktrans %}Django Leaflet Admin List Version {{ version }}{% endblocktrans %}" href="https://github.com/nnseva/django-leaflet-admin-list">' +
+                '{% blocktrans %}DLAList v.{{ version }}{% endblocktrans %}</a>'
+        }).addTo(map).setPosition('bottomright');
+        L.control.scale().addTo(map).setPosition('bottomleft');
+        L.control.zoom({
+            zoomInTitle: '{% trans "Zoom In" %}',
+            zoomOutTitle: '{% trans "Zoom Out" %}',
+        }).addTo(map).setPosition('topleft');
+        L.control.mousePosition().addTo(map).setPosition('bottomright');
+        var URL = document.URL;
+        permalink = (new L.Control.Permalink({
+            text: '{% trans "Permanent Link" %}',
+            useLocation: true,
+            useLocalStorage: false,
+        })).addTo(map).setPosition('bottomleft');
+
+        var bbox_filters = django.jQuery('.bounding_box_filter');
+        // add the bbox selector for every bbox filter to all filters
+        for(var i=0; bbox_filters.length > i; i++) {
+            (function(i, bbox_filter) {
+                var ul = django.jQuery(bbox_filter);
+                var bb = ul.attr('bbox_selected');
+                var name = ul.attr('parameter_name');
+                var title = ul.attr('title_text');
+                var color = colors[i % colors.length]
+                if( bb ) {
+                    bb = bb.split(',');
+                    L.rectangle([[bb[1], bb[0]], [bb[3],bb[2]]], {
+                        color: color,
+                        fill: false,
+                        weight: 1,
+                    }).addTo(map).bindTooltip(title);
+                }
+                var pt = django.jQuery('<span title="{% trans 'Bounding Box color' %}"> \u2588</span>');
+                pt.css('color', color);
+                var li = django.jQuery(ul.find('li')[1]);
+                var a = li.find('a');
+                a.append(pt);
+                var onmap = function(event) {
+                    var bb = map.getBounds();
+                    var c = permalink._round_point(map.getCenter());
+
+                    var e = Math.min(bb.getEast(), 180.0);
+                    var n = Math.min(bb.getNorth(), 85.0);
+                    var w = Math.max(bb.getWest(), -180.0);
+                    var s = Math.max(bb.getSouth(), -85.0);
+                    var width = Math.min(e - w, 180);
+                    var height = Math.min(n - s, 90);
+
+                    w = c.lng - width/2;
+                    e = w + width;
+                    if(e > 180.0) {
+                        e = 180.0;
+                        w = e - width;
+                    } else if(-180 > w) {
+                        w = -180;
+                        e = w + width;
+                    }
+                    s = c.lat - height/2;
+                    n = s + height;
+                    if(n > 85.0) {
+                        n = 85.0;
+                        s = n - height;
+                    } else if(-85.0 > s) {
+                        s = -85.0;
+                        n = s + height;
+                    }
+
+                    var href = a.attr('href');
+                    href = href.replace(RegExp(name+'=[^&#]*'), name+'='+w+','+s+','+e+','+n);
+                    a.attr('href', href);
+
+                    var filters = django.jQuery('#changelist-filter ul');
+                    for(var j=0; filters.length > j; j++) {
+                        var filter = django.jQuery(filters[j]);
+                        var options = filter.find('li');
+                        for(var k=0; options.length > k; k++) {
+                            var option = django.jQuery(options[k]);
+                            var oa = option.find('a');
+                            href = oa.attr('href');
+                            href = href.split('#')[0] + '#' + 'zoom=' + map.getZoom() + '&lat=' + c.lat + '&lon=' + c.lng;
+                            oa.attr('href', href);
+                        }
+                    }
+                };
+                map.on('zoomend', onmap);
+                map.on('moveend', onmap);
+                onmap();
+            })(i, bbox_filters[i]);
+        }
+        var onmap = function(event) {
+            var hash = document.URL.split('#')[1];
+            if( typeof(hash) != 'undefined') {
+                var aa = django.jQuery('.paginator a');
+                for(var i=0; aa.length > i; i++) {
+                    var a = django.jQuery(aa[i]);
+                    a.attr('href', a.attr('href').split('#')[0] + '#' + hash);
+                }
+            }
+        };
+        map.on('zoomend', onmap);
+        map.on('moveend', onmap);
+    }
+    loadmap();
+});
+</script>
+    {% endblock map %}
+{{ block.super }}
+{% endblock result_list %}
