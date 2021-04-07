@@ -29,3 +29,5 @@ env:
 sudo: false
 notifications:
     email: false
+after_failure:
+    - cat `find $TRAVIS_BUILD_DIR -name "*.log"`
