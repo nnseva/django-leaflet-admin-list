@@ -44,6 +44,5 @@ setup(
     install_requires=[
         "django",
         "django-leaflet",
-        "geojson@git+https://github.com/jazzband/geojson",
     ],
 )
