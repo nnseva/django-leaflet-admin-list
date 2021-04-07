@@ -2,9 +2,9 @@ language: python
 matrix:
     include:
         - python: 3.6
-          env: TOXENV="py36--django{2.0,2.1,2.2,3.0},syntax"
+          env: TOXENV="py36--django{2.0,2.1,2.2,3.0,3.1,3.2},syntax"
         - python: 3.7
-          env: TOXENV="py37--django{2.0,2.1,2.2,3.0},coverage"
+          env: TOXENV="py37--django{2.0,2.1,2.2,3.0,3.1,3.2},coverage"
 services:
   - postgresql
 before_install:
