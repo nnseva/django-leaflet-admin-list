@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function
 
 import json
+import re
 
 from tests.models import DeliveryJob, Waypoint
 
@@ -83,3 +84,33 @@ class ModuleTest(TestCase):
         self.assertIn(json.dumps(js), content)
         self.assertRegex(content, r'<a href="[^>].*>Waypoint Test 4</a>')
         self.assertRegex(content, r'<p class="paginator">(.|\n)*1 Waypoint(.|\n)*</p>')
+
+    def test_005_admin_page_works_with_nulls(self):
+        dj_null_all = DeliveryJob.objects.create(
+            name='Delivery Test All Null',
+            kind='oil',
+        )
+        dj_null_pickup = DeliveryJob.objects.create(
+            name='Delivery Test Dropoff Null',
+            pickup_point=Point(61, 61),
+            kind='oil',
+        )
+        dj_null_dropoff = DeliveryJob.objects.create(
+            name='Delivery Test Pickup Null',
+            dropoff_point=Point(71, 71),
+            kind='oil',
+        )
+
+        c = Client()
+        c.login(username='user', password='password')
+        response = c.get('/admin/tests/deliveryjob/')
+        content = response.content.decode('utf-8')
+        match = re.search(r'({"type": "FeatureCollection", "features":[^;]*);', content)
+        self.assertIsNotNone(match)
+        js = json.loads(match.group(1))
+        self.assertIn('features', js)
+        self.assertEqual(len(js['features']), len(self.delivery_jobs) * 2 + 2)
+        self.assertEqual(len([f for f in js['features'] if f['properties']['tooltip'] == "Delivery Test Dropoff Null: Pickup Point"]), 1)
+        self.assertEqual(len([f for f in js['features'] if f['properties']['tooltip'].startswith(dj_null_pickup.name)]), 1)
+        self.assertEqual(len([f for f in js['features'] if f['properties']['tooltip'].startswith(dj_null_dropoff.name)]), 1)
+        self.assertEqual(len([f for f in js['features'] if f['properties']['tooltip'].startswith(dj_null_all.name)]), 0)

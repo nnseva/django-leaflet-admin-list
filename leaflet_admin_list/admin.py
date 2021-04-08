@@ -66,10 +66,10 @@ class LeafletAdminListMixin(object):
 
     def get_geojson_features(self, request, o, queryset):
         '''returns the `features` member of the `FeatureList` instance for the model instance `o`'''
-        return [
+        return [feature for feature in [
             self.get_geojson_feature(request, name, o, queryset)
             for name in self.get_geojson_geometry_fields(request, o, queryset)
-        ]
+        ] if feature]
 
     def get_geojson_geometry_fields(self, request, o, queryset):
         '''returns a list of geometry field names need to be included into the feature list'''
@@ -80,6 +80,8 @@ class LeafletAdminListMixin(object):
 
     def get_geojson_feature(self, request, name, o, queryset):
         '''returns a GeoJSON `Feature` instance representing the instance `o` geometry field `name`'''
+        if not getattr(o, name):
+            return
         return {
             'type': 'Feature',
             'geometry': self.get_geojson_geometry(request, name, o, queryset),

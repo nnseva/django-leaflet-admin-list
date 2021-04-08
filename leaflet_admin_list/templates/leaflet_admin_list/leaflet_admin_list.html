@@ -132,9 +132,13 @@ function () {
                         for(var k=0; options.length > k; k++) {
                             var option = django.jQuery(options[k]);
                             var oa = option.find('a');
-                            href = oa.attr('href');
-                            href = href.split('#')[0] + '#' + 'zoom=' + map.getZoom() + '&lat=' + c.lat + '&lon=' + c.lng;
-                            oa.attr('href', href);
+                            if( oa.length ) {
+                                href = oa.attr('href');
+                                href = href.split('#')[0] + '#' + 'zoom=' + map.getZoom() + '&lat=' + c.lat + '&lon=' + c.lng;
+                                oa.attr('href', href);
+                            } else {
+                                // TODO:
+                            }
                         }
                     }
                 };
