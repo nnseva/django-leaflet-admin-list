@@ -159,6 +159,7 @@ function () {
         };
         map.on('zoomend', onmap);
         map.on('moveend', onmap);
+        onmap();
     }
     loadmap();
 });

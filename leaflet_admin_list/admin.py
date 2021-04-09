@@ -55,7 +55,7 @@ class LeafletAdminListMixin(object):
             if isinstance(f, type) and issubclass(f, BoundingBoxFilter):
                 return list_filter
         # The BBFilter should always be present here
-        return list_filter + [BoundingBoxFilter]
+        return list(list_filter) + [BoundingBoxFilter]
 
     def get_geojson_feature_list(self, request, queryset):
         '''returns the whole GeoJSON `FeatureList` instance representing a `queryset`'''
