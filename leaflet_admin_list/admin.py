@@ -98,7 +98,7 @@ class LeafletAdminListMixin(object):
             'field': name,
             'app_label': o._meta.app_label,
             'model_name': o._meta.model_name,
-            'pk': o.pk,
+            'pk': str(o.pk),
         }
         popup = self.get_geojson_feature_popup(request, name, o, queryset)
         tooltip = self.get_geojson_feature_tooltip(request, name, o, queryset)
