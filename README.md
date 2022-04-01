@@ -1,4 +1,5 @@
 [![Build Status](https://api.travis-ci.com/nnseva/django-leaflet-admin-list.svg?branch=master)](https://travis-ci.com/github/nnseva/django-leaflet-admin-list)
+[![codecov](https://codecov.io/gh/nnseva/django-leaflet-admin-list/branch/master/graph/badge.svg?token=PT13IGSDNM)](https://codecov.io/gh/nnseva/django-leaflet-admin-list)
 
 # Django Leaflet Admin List
 
