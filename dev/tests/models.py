@@ -1,7 +1,9 @@
 from __future__ import absolute_import, print_function
 
+import uuid
+
 from django.contrib.gis.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 class Waypoint(models.Model):
@@ -66,6 +68,13 @@ class DeliveryJob(models.Model):
 
 class Building(models.Model):
     """ Example """
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        verbose_name=_('ID'), help_text=_('An instance ID in form of UUID'),
+    )
 
     name = models.CharField(
         max_length=128,

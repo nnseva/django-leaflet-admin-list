@@ -80,7 +80,7 @@ TEMPLATES = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DATABASE_NAME', 'geoadmin'),
+        'NAME': os.environ.get('DATABASE_NAME', 'test'),
         'USER': os.environ.get('DATABASE_USER', 'test'),
         'PASSWORD': os.environ.get('DATABASE_PASSWORD', 'test'),
         'HOST': os.environ.get('DATABASE_HOST', '127.0.0.1'),
@@ -156,3 +156,5 @@ GEOADMIN = {
         'lon_size': 0.5,
     }
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

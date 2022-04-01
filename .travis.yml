@@ -7,16 +7,27 @@ matrix:
           env: TOXENV="py37--django{2.0,2.1,2.2,3.0,3.1,3.2},coverage"
         - python: 3.8
           env: TOXENV="py38--django{2.0,2.1,2.2,3.0,3.1,3.2}"
+        - python: 3.9
+          env: TOXENV="py39--django{2.2,3.0,3.1,3.2}"
 services:
   - postgresql
 before_install:
   - sudo add-apt-repository --yes ppa:ubuntugis/ppa
   - sudo apt-get --quiet update
   - sudo apt-get install --yes libgdal-dev gdal-bin
-  - sudo apt-get install --yes postgresql-9.6-postgis-2.5 postgis
+addons:
+    postgresql: "10"
+    apt:
+        packages:
+            - postgresql-10
+            - postgresql-client-10
+            - postgresql-10-postgis-2.5
+            - postgis
 install:
   - pip install tox
+  - pip install "setuptools<45"
 before_script:
+  - python -c "import setuptools;print('setuptools:', setuptools.__version__)"
   - psql -U postgres -c "create extension postgis"
 script:
   - tox

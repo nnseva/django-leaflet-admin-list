@@ -3,10 +3,10 @@ from __future__ import absolute_import, print_function
 import json
 import re
 
-from tests.models import DeliveryJob, Waypoint
+from tests.models import Building, DeliveryJob, Waypoint
 
 from django.contrib.auth.models import User
-from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import GeometryCollection, Point
 from django.test import Client, TestCase
 
 
@@ -33,6 +33,14 @@ class ModuleTest(TestCase):
                 pickup_point=Point([50 + i / 100, 50 + (10 - i) / 100]),
                 dropoff_point=Point([50 + (10 - i) / 100, 50 + i / 100]),
                 kind='wood',
+            )
+            for i in range(1, 10)
+        ]
+
+        self.buildings = [
+            Building.objects.create(
+                name='Building Test %s' % i,
+                geometry=GeometryCollection([Point([50 + i / 100, 50 + (10 - i) / 100 + 0.5])])
             )
             for i in range(1, 10)
         ]
@@ -114,3 +122,24 @@ class ModuleTest(TestCase):
         self.assertEqual(len([f for f in js['features'] if f['properties']['tooltip'].startswith(dj_null_pickup.name)]), 1)
         self.assertEqual(len([f for f in js['features'] if f['properties']['tooltip'].startswith(dj_null_dropoff.name)]), 1)
         self.assertEqual(len([f for f in js['features'] if f['properties']['tooltip'].startswith(dj_null_all.name)]), 0)
+
+    def test_006_admin_page_map_uuid(self):
+        """Test whether the map is present on the changelist view for UUID"""
+        c = Client()
+        c.login(username='user', password='password')
+        response = c.get('/admin/tests/building/')
+        self.assertIn('<div id="leaflet_admin_list_map"', response.content.decode('utf-8'))
+
+    def test_007_admin_page_filter_uuid(self):
+        """Test whether the bounding box filter is present on the changelist view for UUID"""
+        c = Client()
+        c.login(username='user', password='password')
+        response = c.get('/admin/tests/building/')
+        self.assertIn('<ul class="bounding_box_filter"', response.content.decode('utf-8'))
+
+    def test_008_admin_page_feature_list_uuid(self):
+        """Test whether the feature collection is rendered directly on the changelist view"""
+        c = Client()
+        c.login(username='user', password='password')
+        response = c.get('/admin/tests/building/')
+        self.assertIn('js = {"type": "FeatureCollection", "features": [', response.content.decode('utf-8'))

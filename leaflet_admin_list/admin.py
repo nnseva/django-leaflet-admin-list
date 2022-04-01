@@ -4,7 +4,7 @@ import operator
 
 from django.contrib.gis.db.models import GeometryField
 from django.urls import reverse
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .filters import BoundingBoxFilter
 from .version import __version__
@@ -98,7 +98,7 @@ class LeafletAdminListMixin(object):
             'field': name,
             'app_label': o._meta.app_label,
             'model_name': o._meta.model_name,
-            'pk': o.pk,
+            'pk': o.pk if isinstance(o.pk, (int, str)) else str(o.pk),
         }
         popup = self.get_geojson_feature_popup(request, name, o, queryset)
         tooltip = self.get_geojson_feature_tooltip(request, name, o, queryset)
