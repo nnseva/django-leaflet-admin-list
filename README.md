@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.com/nnseva/django-leaflet-admin-list.svg?branch=master)](https://travis-ci.com/github/nnseva/django-leaflet-admin-list)
+[![Tests](https://github.com/nnseva/django-leaflet-admin-list/actions/workflows/test.yml/badge.svg)](https://github.com/nnseva/django-leaflet-admin-list/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/nnseva/django-leaflet-admin-list/branch/master/graph/badge.svg?token=PT13IGSDNM)](https://codecov.io/gh/nnseva/django-leaflet-admin-list)
 
 # Django Leaflet Admin List
@@ -20,6 +20,15 @@ pip install django-leaflet-admin-list
 ```
 pip install git+git://github.com/nnseva/django-leaflet-admin-list.git
 ```
+
+### Compatibility notice for libgdal
+
+Use proper versions of **libgdal** library with older Django versions.
+
+Some strange effect of reverting coordinates in the GeoJSON (not concerning to the package, but regarding to the Django itself)
+has been found with the modern **libgdal** version (2.9) and the following Django versions: *2.0, 2.1, 2.2, 3.0*
+
+Downgrade libgdal to the **libgdal26** (present in the Ubuntu apt repository) if you would like to use such Django versions.
 
 ## Configuration
 

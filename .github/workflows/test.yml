@@ -1,0 +1,136 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+
+  backward-compatible:
+
+    runs-on: ubuntu-20.04
+    strategy:
+      max-parallel: 2
+      matrix:
+        include:
+          - python-version: "3.6"
+            toxenv: py36-django{2.0,2.1,2.2,3.0,3.1,3.2}
+          - python-version: "3.7"
+            toxenv: py37-django{2.0,2.1,2.2,3.0,3.1,3.2}
+          - python-version: "3.8"
+            toxenv: py38-django{2.2,3.0,3.1,3.2},syntax
+          - python-version: "3.9"
+            toxenv: py39-django{2.2,3.0,3.1,3.2}
+
+    # service containers to run with
+    services:
+      # label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgis/postgis:9.6-2.5
+        # service environment variables
+        # `POSTGRES_HOST` is `postgres`
+        env:
+          # optional (defaults to `postgres`)
+          POSTGRES_DB: geoadmin
+          # required
+          POSTGRES_PASSWORD: test
+          # optional (defaults to `5432`)
+          POSTGRES_PORT: 5432
+          # optional (defaults to `postgres`)
+          POSTGRES_USER: test
+        ports:
+          # maps tcp port 5432 on service container to the host
+          - 5432:5432
+        # set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        # sudo add-apt-repository --yes ppa:ubuntugis/ppa
+        # sudo apt-get --quiet update
+        sudo apt-get install --yes libgdal26 gdal-bin
+        python -m pip install --upgrade pip
+        pip install "tox<4"
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Run Tests
+      env:
+        TOXENV: ${{ matrix.toxenv }}
+      run: |
+        tox
+
+  last-versions:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        include:
+          - python-version: "3.8"
+            toxenv: py38-django{3.2,4.0,4.1}
+          - python-version: "3.9"
+            toxenv: py39-django{3.2,4.0,4.1}
+          - python-version: "3.10"
+            toxenv: py310-django{3.2,4.0,4.1}
+          - python-version: "3.11"
+            toxenv: py311-django{3.2,4.0,4.1},coverage
+
+    # service containers to run with
+    services:
+      # label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgis/postgis:11-3.3
+        # service environment variables
+        # `POSTGRES_HOST` is `postgres`
+        env:
+          # optional (defaults to `postgres`)
+          POSTGRES_DB: geoadmin
+          # required
+          POSTGRES_PASSWORD: test
+          # optional (defaults to `5432`)
+          POSTGRES_PORT: 5432
+          # optional (defaults to `postgres`)
+          POSTGRES_USER: test
+        ports:
+          # maps tcp port 5432 on service container to the host
+          - 5432:5432
+        # set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Dependencies
+      run: |
+        #sudo add-apt-repository --yes ppa:ubuntugis/ppa
+        #sudo apt-get --quiet update
+        sudo apt-get install --yes libgdal-dev gdal-bin
+        python -m pip install --upgrade pip
+        pip install "tox<4"
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Run Tests
+      env:
+        TOXENV: ${{ matrix.toxenv }}
+      run: |
+        tox
