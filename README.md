@@ -30,6 +30,9 @@ has been found with the modern **libgdal** version (2.9) and the following Djang
 
 Downgrade libgdal to the **libgdal26** (present in the Ubuntu apt repository) if you would like to use such Django versions.
 
+The source of the effect is backward incompatibility of **libGDAL**, the issue [here](https://github.com/OSGeo/gdal/issues/1546)
+describes the problem.
+
 ## Configuration
 
 Include the `leaflet_admin_list` application into the `INSTALLED_APPS` list, like:
