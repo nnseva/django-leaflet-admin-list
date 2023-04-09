@@ -52,7 +52,12 @@ function () {
         }).addTo(map);
         var hash = document.URL.split('#')[1];
         if( !hash ) {
-            map.fitBounds(geojson.getBounds());
+            var bounds = geojson.getBounds();
+            if (bounds.isValid()) {
+                map.fitBounds(bounds);
+            } else {
+                map.setView([0, 0], 1);
+            }
         }
 
         L.control.attribution({
