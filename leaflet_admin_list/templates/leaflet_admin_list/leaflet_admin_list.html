@@ -13,10 +13,6 @@ function () {
             zoomControl: false,
             attributionControl: false,
         });
-        var hash = document.URL.split('#')[1];
-        if( !hash ) {
-            map.setView([0, 0], 1);
-        }
 
         var colors = [
             '#ff0000', '#800000', '#191970', '#ffa500', '#0000cd', '#7cfc00', '#00fa9a', '#00ffff', '#ff00ff', '#1e90ff', '#ffff54', '#dda0dd', '#ff1493', '#ffdab9', '#2f4f4f', '#6b8e23',
@@ -54,6 +50,15 @@ function () {
                 }
             }
         }).addTo(map);
+        var hash = document.URL.split('#')[1];
+        if( !hash ) {
+            var bounds = geojson.getBounds();
+            if (bounds.isValid()) {
+                map.fitBounds(bounds);
+            } else {
+                map.setView([0, 0], 1);
+            }
+        }
 
         L.control.attribution({
             prefix:
