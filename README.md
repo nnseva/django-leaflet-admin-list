@@ -23,15 +23,13 @@ pip install git+git://github.com/nnseva/django-leaflet-admin-list.git
 
 ### Compatibility notice for libgdal
 
-Use proper versions of **libgdal** library with older Django versions.
-
 Some strange effect of reverting coordinates in the GeoJSON (not concerning to the package, but regarding to the Django itself)
 has been found with the modern **libgdal** version (2.9) and the following Django versions: *2.0, 2.1, 2.2, 3.0*
 
-Downgrade libgdal to the **libgdal26** (present in the Ubuntu apt repository) if you would like to use such Django versions.
-
 The source of the effect is backward incompatibility of **libGDAL**, the issue [here](https://github.com/OSGeo/gdal/issues/1546)
 describes the problem.
+
+The [Django2 Backport package](https://github.com/nnseva/django2-postgres-backport/) looks like fixing the problem.
 
 ## Configuration
 

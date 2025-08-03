@@ -1,5 +1,3 @@
-from __future__ import absolute_import, print_function
-
 import uuid
 
 from django.contrib.gis.db import models
