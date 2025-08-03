@@ -29,8 +29,9 @@ function () {
             pointToLayer: function(point, latlng) {
                 var point_style = point.properties.point_style || {};
                 var icon_style = point_style.icon;
-                point_style.icon = icon_style ? L.icon(icon_style) : L.Marker.prototype.options.icon;
-                return L.marker(latlng, point_style);
+                var options = {...point_style};
+                options.icon = icon_style ? L.icon(icon_style) : L.Marker.prototype.options.icon;
+                return L.marker(latlng, options);
             },
             style: function(feature) {
                 return feature.properties.line_style;
