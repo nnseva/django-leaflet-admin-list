@@ -20,6 +20,7 @@ function () {
 
         var osm = L.tileLayer('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '<a title="{% trans 'Open Street Map Tiles' %}" href="https://www.openstreetmap.org/">OSM</a>',
+            referrerPolicy: "strict-origin-when-cross-origin",
             id: 'osm',
         }).addTo(map);
 
