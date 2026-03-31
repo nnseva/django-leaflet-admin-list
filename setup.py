@@ -7,7 +7,7 @@ with open("README.rst", "r") as fp:
     description = fp.read() + "\n"
 
 setup(
-    name="django-leaflet-admin-list",
+    name="django_leaflet_admin_list",
     version=version,
     description="Django Leaflet Admin List",
     long_description=description,
